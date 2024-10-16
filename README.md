@@ -18,7 +18,7 @@ __AWS Resources Required for the Design:__
 
 - __Availability Zones:__ 3 subnets in us-east-1a, and 3 subnets in us-east-1b
 
-- __VPC Network Range:__ 10.0.0.0/16
+- __VPC Network Range:__ 10.0.0.0/24
 
 - __Subnets:__ 10.0.1.0/24, 10.0.2.0/24, 10.0.3.0/24, 10.0.4.0/24, 10.0.5.0/24, 10.0.6.0/24
 
@@ -79,16 +79,16 @@ __SET UP A VIRTUAL PRIVATE CLOUD ON AWS (VPC):__
 
 - CREATE VPC
 
+![](images/6.png)
 
 
+![](images/7.png)
 
 
+![](images/8.png)
 
 
-
-
-
-
+![](images/9.png)
 
 
 
