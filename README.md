@@ -5,7 +5,7 @@
 
 
 
-We are designing a secure infrastructure within an AWS Virtual Private Cloud (VPC) for `ZenithByte`  Company, which runs a WordPress CMS for its primary business website and a [Tooling](https://github.com/ogechukwu1/Devops-Tooling-Website-Solution) website for the DevOps team. 
+We are designing a secure infrastructure within an AWS Virtual Private Cloud (VPC) for `Zenithbyte`  Company, which runs a WordPress CMS for its primary business website and a [Tooling](https://github.com/ogechukwu1/Devops-Tooling-Website-Solution) website for the DevOps team. 
 
 To enhance security and performance, the company has chosen to implement NGINX reverse proxy technology as part of the solution.
 
@@ -53,10 +53,31 @@ __AWS MULTIPLE WEBSITE PROJECT__
 
 ![](images/1.png)
 
+__Initial setup__
 
-__SET UP A VIRTUAL PRIVATE CLOUD (VPC):__
+- Create a dedicated sub-account in AWS to manage all resources for the company's AWS solutions, and assign an appropriate name, such as `DevOps`.
 
-__CREATE VPC__
+- From the root account, create an Organizational Unit (OU) `Dev` and move the sub-account into the OU. The `Dev` resources will be launched within this sub-account.
+
+
+![](images/3.png)
+
+
+- Create a domain name for the company website using a domain name provider, where you can acquire a domain name through the [Namecheap](https://www.namecheap.com/) website.
+
+- After that, set up a hosted zone in AWS and link the name servers from the hosted zone to the domain name.
+
+
+![](images/4.png)
+
+
+![](images/5.png)
+
+
+
+__SET UP A VIRTUAL PRIVATE CLOUD ON AWS (VPC):__
+
+- CREATE VPC
 
 
 
