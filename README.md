@@ -198,126 +198,150 @@ Create 3 Elastic IPs: one Elastic IP will be assigned to the NAT Gateway, while 
 
 
 
+![](./images/32.png)
 
 
 
+Create a NAT Gateway and assign one of the Elastic IPs. Ensure the NAT Gateway is created in the public subnet. A NAT Gateway allows instances in a private subnet to access services outside your VPC, while preventing external services from initiating connections to those instances.
 
+![](./images/33.png)
 
 
+![](./images/34.png)
 
 
+![](./images/35.png)
 
 
+![](./images/36.png)
 
 
 
 
+Modify the route in the private route table to associate it with the NAT Gateway. This enables outbound traffic to the internet while preventing inbound traffic from the internet.
 
 
 
+![](./images/37.png)
 
 
+![](./images/38.png)
 
 
+![](./images/39.png)
 
 
+![](./images/40.png)
 
 
 
 
+Create a Security Group for the Application Load Balancer that permits access from the internet.
 
 
+![](./images/41.png)
 
+![](./images/42.png)
 
 
+![](./images/43.png)
 
 
+![](./images/44.png)
 
 
 
 
+Create security group for Access to the Bastion servers should be restricted to only those workstations that require SSH access. Therefore, you can use the public IP address of your workstation. 
 
+To find this information, simply open your terminal and type `curl www.canhazip.com` it gives you your public ip address  or use `ipconfig` in the Command Prompt to see your private IP address.
 
+- To find your public IP address using the Command Prompt (CMD) on your local workstation, you should use the following method:
 
+  - Open Command Prompt:
+  - Press Windows + R to open the Run dialog.
+  - Type cmd and press Enter.
+  - Run the Command `curl www.canhazip.com` to find your Public IP
+  - If you specifically want to see your local (private) IP address on your network, you can use the `ipconfig` command:
 
 
+![](./images/45.png)
 
 
+![](./images/46.png)
 
 
 
+Create a security group for the Application Load Balancer that permits access solely from the internet.
 
 
+![](./images/47.png)
 
 
+Security Group for webservers - Access to Webservers should only be allowed from webserver ALB and bastion host.
 
 
 
+![](./images/48.png)
 
 
+![](./images/49.png)
 
 
 
+Create a Security Group for Nginx Servers - Access to Nginx should only be allowed from a Application Load balancer (ALB) and bastion host.
 
 
+![](./images/50.png)
 
+![](./images/51.png)
 
 
 
 
+Create security group for the internal ALB - allow access to only nginx reverse proxy.
 
 
+![](./images/52.png)
 
 
+![](./images/53.png)
 
 
 
 
+create a security group for your backend services (such as RDS and EFS) that allows access from the web servers and the bastion host
 
 
 
+![](./images/54.png)
 
 
+![](./images/55.png)
 
 
 
+Purchase a domain name and Create an ACM certificate
 
 
+![](./images/4.png)
 
+![](./images/56.png)
 
 
+![](./images/57.png)
 
+![](./images/58.png)
 
 
+![](./images/59.png)
 
+![](./images/60.png)
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Create DNS records for both the Tooling and WordPress sites.
 
 
 
