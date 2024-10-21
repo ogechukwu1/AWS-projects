@@ -235,8 +235,13 @@ Modify the route in the private route table to associate it with the NAT Gateway
 
 
 
+__Create Security Group for NGINX Servers:__ Access to Nginx should be allowed only from the Application Load Balancer (ALB).
 
-Create a Security Group for the Application Load Balancer that permits access from the internet.
+![](./images/50.png)
+
+
+__Create Security Group for Application Load Balancer (ALB):__ Application Load Balancer (ALB) access should be allowed from the Internet.
+
 
 
 ![](./images/41.png)
@@ -251,10 +256,10 @@ Create a Security Group for the Application Load Balancer that permits access fr
 
 
 
+__Create Security Group for Bastion Servers:__ Access to Bastion servers should be allowed only from specific workstations for SSH access.
 
-Create security group for Access to the Bastion servers should be restricted to only those workstations that require SSH access. Therefore, you can use the public IP address of your workstation. 
+Therefore, you can use the public IP address of your workstation. 
 
-To find this information, simply open your terminal and type `curl www.canhazip.com` it gives you your public ip address  or use `ipconfig` in the Command Prompt to see your private IP address.
 
 - To find your public IP address using the Command Prompt (CMD) on your local workstation, you should use the following method:
 
@@ -278,7 +283,8 @@ Create a security group for the Application Load Balancer that permits access so
 ![](./images/47.png)
 
 
-Security Group for webservers - Access to Webservers should only be allowed from webserver ALB and bastion host.
+__Create Security Group for Web Servers:__ Access to Web Servers should only be allowed from NGINX servers and SSH from bastion host
+
 
 
 
@@ -287,14 +293,6 @@ Security Group for webservers - Access to Webservers should only be allowed from
 
 ![](./images/49.png)
 
-
-
-Create a Security Group for Nginx Servers - Access to Nginx should only be allowed from a Application Load balancer (ALB) and bastion host.
-
-
-![](./images/50.png)
-
-![](./images/51.png)
 
 
 
