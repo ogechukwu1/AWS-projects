@@ -194,7 +194,7 @@ Edit the route in the public route table and associate it with the Internet Gate
 ![](./images/31.png)
 
 
-Create 3 Elastic IPs: one Elastic IP will be assigned to the NAT Gateway, while the other two will be allocated to the Bastion hosts.
+__Create 3 Elastic IPs:__ one Elastic IP will be assigned to the NAT Gateway, while the other two will be allocated to the Bastion hosts.
 
 
 
@@ -237,22 +237,14 @@ Modify the route in the private route table to associate it with the NAT Gateway
 
 __Create Security Group for NGINX Servers:__ Access to Nginx should be allowed only from the Application Load Balancer (ALB).
 
-![](./images/50.png)
-
-
-__Create Security Group for Application Load Balancer (ALB):__ Application Load Balancer (ALB) access should be allowed from the Internet.
-
-
 
 ![](./images/41.png)
 
-![](./images/42.png)
+![](./images/50.png)
+
+![](./images/51.png)
 
 
-![](./images/43.png)
-
-
-![](./images/44.png)
 
 
 
@@ -277,13 +269,22 @@ Therefore, you can use the public IP address of your workstation.
 
 
 
-Create a security group for the Application Load Balancer that permits access solely from the internet.
+__Create Security Group for Application Load Balancer (ALB):__ Application Load Balancer (ALB) access should be allowed from the Internet.
 
 
-![](./images/47.png)
+
+![](./images/42.png)
 
 
-__Create Security Group for Web Servers:__ Access to Web Servers should only be allowed from NGINX servers and SSH from bastion host
+![](./images/43.png)
+
+
+![](./images/44.png)
+
+
+
+
+__Create Security Group for Web Servers:__ Access to Web Servers should only be allowed from NGINX servers and bastion host
 
 
 
@@ -296,19 +297,7 @@ __Create Security Group for Web Servers:__ Access to Web Servers should only be 
 
 
 
-
-Create security group for the internal ALB - allow access to only nginx reverse proxy.
-
-
-![](./images/52.png)
-
-
-![](./images/53.png)
-
-
-
-
-create a security group for your backend services (such as RDS and EFS) that allows access from the web servers and the bastion host
+__Create Security Group for Data Layer (RDS and EFS):__ Access to RDS and EFS should be allowed only from Web Servers (for RDS) and from NGINX and Web Servers (for EFS)
 
 
 
@@ -318,8 +307,11 @@ create a security group for your backend services (such as RDS and EFS) that all
 ![](./images/55.png)
 
 
+![](./images/61.png)
 
-Purchase a domain name and Create an ACM certificate
+
+
+__Purchase a domain name and Create an ACM certificate__
 
 
 ![](./images/4.png)
@@ -339,7 +331,7 @@ Purchase a domain name and Create an ACM certificate
 
 
 
-Create DNS records for both the Tooling and WordPress sites.
+__Create DNS records for both the `Tooling` and `WordPress` sites.__
 
 
 
