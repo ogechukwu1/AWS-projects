@@ -450,128 +450,374 @@ Both the production and development/testing environments enable you to encrypt t
 
 
 
-__Proceed With Compute Resources__
+### Proceed With Compute Resources
 
 
 Setting up compute resources in your VPC for Nginx involves several steps, including launching EC2 instances, creating a launch template, configuring target groups, and setting up autoscaling.
 
 
-__Set Up Compute Resources for Nginx__
+__Step 1: Provision EC2 Instance for Nginx__
 
-Step 1: Provision EC2 Instances for Nginx
+![](./images/94.png)
 
 
 
+__step 2: Install Required Packages__
 
+- Once logged into the instance, run the following commands to install the required packages and configure SELinux policies
 
+```
+# Enable EPEL repository and install dependencies
 
+sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+sudo yum install -y dnf-utils http://rpms.remirepo.net/enterprise/remi-release-8.rpm
+sudo yum install wget vim python3 telnet htop git mysql net-tools chrony -y
 
 
+# Start and enable NTP service
 
+sudo systemctl start chronyd
+sudo systemctl enable chronyd
+sudo systemctl status chronyd
 
+# Configure SELinux policies
 
+sudo setsebool -P httpd_can_network_connect=1
+sudo setsebool -P httpd_can_network_connect_db=1
+sudo setsebool -P httpd_execmem=1
+sudo setsebool -P httpd_use_nfs 1
 
 
+# Install Amazon EFS client utils
 
+git clone https://github.com/aws/efs-utils
+cd efs-utils
+sudo yum install -y make
+sudo yum install -y rpm-build
+sudo make rpm
+sudo yum install -y  ./build/amazon-efs-utils*rpm
 
+```
 
 
+__step 3: Set up Self-Signed SSL Certificate__
 
+- Configure SSL by generating a self-signed certificate for securing HTTPS connections:
 
+```
 
+# Create directory and set permissions for SSL
 
+sudo mkdir /etc/ssl/private
+sudo chmod 700 /etc/ssl/private
 
 
+# Generate self-signed certificate and Diffie-Hellman parameter
 
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/zenithbyte.key -out /etc/ssl/certs/zenithbyte.crt
 
+sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
 
 
+# To verify that my certificate installation was successful and that it is present on the server.
 
+sudo ls -l /etc/ssl/certs/
+sudo ls -l /etc/ssl/private/
 
+# Start and enable nginx
 
+sudo systemctl start nginx
+sudo systemctl enable nginx
 
+```
 
+__step 4: Configure Nginx Reverse Proxy
+Create a custom Nginx configuration file for reverse proxy setup. Save the configuration below as `/etc/nginx/reverse.conf`:__
 
+```
+user nginx;
+worker_processes auto;
+error_log /var/log/nginx/error.log;
+pid /run/nginx.pid;
 
+include /usr/share/nginx/modules/*.conf;
 
+events {
+    worker_connections 1024;
+}
 
+http {
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
 
+    access_log  /var/log/nginx/access.log  main;
 
+    sendfile            on;
+    tcp_nopush          on;
+    tcp_nodelay         on;
+    keepalive_timeout   65;
+    types_hash_max_size 2048;
 
+    default_type        application/octet-stream;
+    include /etc/nginx/conf.d/*.conf;
 
+    server {
+        listen       80;
+        listen       443 http2 ssl;
+        listen       [::]:443 http2 ssl;
+        root         /var/www/html;
+        server_name  ogechukwu.site;
 
+        ssl_certificate /etc/ssl/certs/zenithbyte.crt;
+        ssl_certificate_key /etc/ssl/private/zenithbyte.key;
+        ssl_dhparam /etc/ssl/certs/dhparam.pem;
 
+        location /healthstatus {
+            access_log off;
+            return 200;
+        }
 
+        location / {
+            proxy_set_header Host $host;
+            proxy_pass https://internal-zenithbyte-alb-500059783.us-east-1.elb.amazonaws.com/;
+        }
+    }
+}
 
+```
 
+### Setup compute resources for Bastion server
 
+__Step 1: Provision the EC2 Instance for Bastion Server__
 
 
+![](./images/100.png)
 
 
 
+__Step 2: Install Required Packages__
 
 
+```
+# Install EPEL and Remi repositories
 
+sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 
+sudo yum install -y dnf-utils http://rpms.remirepo.net/enterprise/remi-release-8.rpm
 
 
 
+# Install additional utilities
+sudo yum install -y wget vim python3 telnet htop git mysql net-tools chrony -y
 
+# Start and enable chronyd
+sudo systemctl start chronyd
+sudo systemctl enable chronyd
+sudo systemctl status chronyd
 
+```
 
+__step 3: Connect to RDS and Create Databases__
 
 
+```
+# Start SSH agent
+eval `ssh-agent`
 
+# Add your private key
+ssh-add path/to/your/project-key.pem
 
+# Connect to the Bastion host
+ssh -A ec2-user@<Bastion_IP_Address>
 
+```
 
+__step4: Connect to the MySQL RDS Instance: From the Bastion host, connect to your RDS instance using MySQL client:__
 
+```
+mysql -h <RDS_endpoint> -u <username> -p
+```
+__step5: Create Databases: Once logged into MySQL, run the following commands to create the required databases:
+sql__
 
+```
+CREATE DATABASE wordpressdb;
+CREATE DATABASE toolingdb;
+```
 
 
 
 
+### Setup compute resources for webserver
 
 
+__step1: Provision EC2 Instances for Web Servers__
 
 
+![](./images/101.png)
 
 
 
+__step2: Install Required Packages__
 
+```
+sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+sudo yum install -y dnf-utils http://rpms.remirepo.net/enterprise/remi-release-8.rpm
+sudo yum install -y wget vim python3 telnet htop git mysql net-tools chrony
 
+# Configure and Start Chrony
+sudo systemctl start chronyd
+sudo systemctl enable chronyd
+sudo systemctl status chronyd
 
+# Configure SELinux Policies
+sudo setsebool -P httpd_can_network_connect=1
+sudo setsebool -P httpd_can_network_connect_db=1
+sudo setsebool -P httpd_execmem=1
+sudo setsebool -P httpd_use_nfs 1
 
+# Install Amazon EFS Utils
+git clone https://github.com/aws/efs-utils
+cd efs-utils
 
+# Install dependencies and build the RPM package:
+sudo yum install -y make rpm-build
+sudo make rpm
 
+# Install the EFS utilities RPM:
+sudo yum install -y ./build/amazon-efs-utils*rpm
 
+# Set Up Self-Signed SSL Certificate
+sudo yum install -y mod_ssl
 
+# Generate the self-signed certificate:
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+-keyout /etc/ssl/private/zenithbyte.key \
+-out /etc/ssl/certs/zenithbyte.crt
 
+# Update Apache Configuration for SSL
+# Open the ssl.conf file in a text editor:
+sudo vi /etc/httpd/conf.d/ssl.conf
 
+# Replace the paths for SSLCertificateFile and SSLCertificateKeyFile:
+SSLCertificateFile /etc/ssl/certs/zenithbyte.crt
+SSLCertificateKeyFile /etc/ssl/private/zenithbyte.key
 
+# Restart Apache
+sudo systemctl restart httpd
+sudo systemctl enable httpd
+sudo systemctl status httpd
 
+```
 
 
+Creating the AMIs for Webserver, Bastion and Nginx
 
+Select Instance > Action > Image and Templates > Create Image
 
 
+![](./images/102.png)
 
+![](./images/103.png)
 
+![](./images/104.png)
 
+![](./images/105.png)
 
+![](./images/106.png)
 
 
 
+__Configuring Target Groups__
 
+__For Nginx Server__
 
+- Selecting Instances as the target type
+- Ensuring the protocol HTTPS on secure TLS port 443
+- Ensuring that the health check path is /healthstatus
 
 
+```
+Step 1: In the left-hand menu, under Load Balancing,click on Target Groups.
 
+Step 2: Create a New Target Group
+Click on Create target group.
+Configure the following details:
+Choose a target type: Select Instances.
+Target group name: Enter a descriptive name, e.g., nginx-target-group.
+Protocol: Select HTTPS.
+Port: Set the port to 443 (the secure TLS port).
+VPC: Choose the VPC where the Nginx instances are running.
 
+Step 3: Configure Health Checks
+Health check protocol: Select HTTP or HTTPS (use HTTPS for secure checks).
+Health check path: Enter /healthstatus.
+Optional: Configure advanced health check settings as needed:
+Healthy threshold: Number of consecutive successful checks required before considering the target healthy (e.g., 3).
+Unhealthy threshold: Number of consecutive failed checks required before considering the target unhealthy (e.g., 3).
+Timeout: Time to wait for a response during a health check (e.g., 5 seconds).
+Interval: Time between health checks (e.g., 30 seconds).
 
+Step 4: Register Targets
+In the Register targets section, select the Nginx instances you want to include in this Target Group.
+Click Include as pending to add them to the list.
+Click Create target group to complete the setup.
+```
 
 
+__For Wordpress__
+
+- Selecting Instances as the target type
+- Ensuring the protocol HTTPS on secure TLS port 443
+- Ensuring that the health check path is /healthstatus
+
+__For Tooling__
+
+- Selecting Instances as the target type
+- Ensuring the protocol HTTPS on secure TLS port 443
+- Ensuring that the health check path is /healthstatus
+
+
+![](./images/108.png)
+
+
+__Configuring Application Load Balancer (ALB)__
+
+__Create the ALB forwarding traffic to the Nginx reverse proxy__
+
+
+![](./images/109.png)
+
+
+__Create the ALB forwarding traffic to the Webservers__
+
+There are two target groups: tooling and WordPress. We will configure WordPress as the default target group.
+
+![](./images/110.png)
+
+
+
+
+__We go to the listeners to set rules for the the tooling target group__
+
+
+![](./images/111.png)
+
+![](./images/112.png)
+
+
+![](./images/113.png)
+
+
+
+
+__Creating A Launch Template__
+
+__For Bastion__
+
+
+![](./images/114.png)
 
 
 
